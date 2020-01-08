@@ -1,0 +1,76 @@
+*****************************************************************************
+*        frapcon3, steady-state fuel rod analysis code                      *                  
+*----------------------------------------------------------------------     *
+*                                                                           *
+*         CASE DESCRIPTION: FK-1 Base Irradiation                           *
+*                                                                           *
+*UNIT     FILE DESCRIPTION                                                  *
+*----     -----------------------------------------------Output:            *
+*         Output :                                                          *
+*    6        STANDARD PRINTER OUTPUT                                       *
+*                                                                           *
+*         Scratch:                                                          *
+*    5        SCRATCH INPUT FILE FROM ECH01                                 *
+*                                                                           *
+*  Input:   FRAPCON2 INPUT FILE (UNIT 55)                                   *
+*                                                                           *
+*****************************************************************************
+* GOESINS:
+FILE05='nullfile', STATUS='UNKNOWN', FORM='FORMATTED',
+         CARRIAGE CONTROL='NONE'
+*
+* GOESOUTS:
+FILE06='FK1-Base.out',    STATUS='UNKNOWN', CARRIAGE CONTROL='LIST'
+FILE66='FK1-Base.plot', STATUS='UNKNOWN', FORM='FORMATTED',
+        CARRIAGE CONTROL='LIST'
+/****************************************************************************
+Base Irradiation of FK-1
+ $frpcn
+ im=49,
+ na=11,
+ mechan = 2,
+ ngasr = 45,
+ $end
+ $frpcon
+ dco=0.4831,
+ thkcld=3.3858e-2,
+ thkgap=4.7244e-3,
+ totl=12.0,
+ cpl=0.8268,
+ dspg=0.2874,
+ dspgw=4.7244e-2,
+ vs=15,
+ hplt=0.4055,
+ rc=0.0,
+ hdish=0.0,
+ dishsd=0.0,
+ enrch=3.9,
+ fotmtl=2.0,
+ den=95.0,
+ roughf=7.874e-5,
+ rsntr=74.11, 
+ icm=2,
+ cldwks=0.0,
+ roughc=1.97e-5
+ idxgas=1,
+ fgpav=43.51,
+ iplant=-3,
+ nsp=0,
+ p2=1035.0,
+ tw=549.0,
+ go=1.14e6,
+ pitch=0.640,
+ nunits=1,
+ crephr=10.0,
+ jdlpr=0,
+ nplot=1,
+ ntape=1,
+ jn=2,
+ jst=49*1,
+ iq=0,
+ fa=1,
+ x(1)=0.0,12.0
+ qf(1)=1.0,1.0
+ ProblemTime=   ***Add times here
+ qmpy=          ***Add powers here
+ $end
