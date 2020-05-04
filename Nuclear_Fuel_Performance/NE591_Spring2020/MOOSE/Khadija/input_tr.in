@@ -1,0 +1,112 @@
+ [Mesh]# cm_unit
+  [gen]
+    type = GeneratedMeshGenerator #fuel+gap+clad
+    dim = 2
+    nx = 100
+    xmax = .7
+    ny = 100
+    ymax = 1
+  []
+  [./subdomain1]#fluel+gap
+    input = gen
+    type = SubdomainBoundingBoxGenerator
+    bottom_left = '0 0 0'
+    top_right = '.6 1 0'
+    block_id = 1
+  [../]
+  [./subdomain2]#fuel
+    input =subdomain1 
+    type = SubdomainBoundingBoxGenerator
+    bottom_left = '0 0 0'
+    top_right = '.5 1 0'
+    block_id = 2
+  [../]  
+
+[]
+
+[Variables]
+  [./temp]
+  initial_condition = 500 #K
+  [../]
+
+[]
+
+[Materials]
+  [./fuelMat]
+    type = GenericConstantMaterial
+    prop_names = 'thermal_conductivity specific_heat density'
+    prop_values= '0.3 0.33 10.98' #W/cm-K J/g-K g/cm3
+    block = '2'
+  [../]
+  [./gapMat]
+    type = GenericConstantMaterial
+    prop_names = 'thermal_conductivity specific_heat density'
+    prop_values ='0.1 5.19 0.00082'#W/cm-K J/g-K g/cm3
+    block = '1'
+  [../]
+  [./cladMat]
+    type = GenericConstantMaterial
+    prop_names = 'thermal_conductivity specific_heat density'
+    prop_values ='0.17 0.27 6.5'#W/cm-K J/g-K g/cm3
+    block = '0'
+  [../]
+[]
+
+[Problem]
+  type = FEProblem
+  coord_type = RZ
+  rz_coord_axis = Y #symmetry_about_Y_axis
+[]
+
+[Kernels]
+  [./heat_source]
+    type = HeatSource
+    function = volumetric_heat
+    variable = temp
+    block = '2' #fuel
+  [../]
+  [./conduction]
+    type = HeatConduction
+    variable = temp
+    block= '0 1 2'
+  [../]
+  [./conduction_time]
+    type = HeatConductionTimeDerivative
+    variable = temp
+    block= '0 1 2'	
+  []
+[]
+
+[Functions]
+  [./volumetric_heat]
+     type = ParsedFunction
+     value = 150*(exp((-0.03)*t))+250 #W/cm3
+  [../]
+[]
+
+[BCs]
+  [inlet_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = left
+    value = 0 #zero_flux_due_to_symmetry
+  []
+  [outlet_temp]
+    type = DirichletBC
+    variable = temp
+    boundary = right
+    value = 500 # (K)
+  []
+[]
+
+[Executioner]
+  type = Transient
+  start_time = 0.0
+  dt = 1
+  num_steps = 200 #200*dt=200 sec
+  solve_type = PJFNK
+[]
+
+[Outputs]
+  exodus = true
+[]
