@@ -1,0 +1,140 @@
+[Mesh]
+   [generator]
+      type = GeneratedMeshGenerator
+      dim = 2
+      nx = 105
+      ny = 105
+      xmin = 0.0
+      ymin = 0.0
+      xmax = 0.7
+      ymax = 1.0 #1D
+   []
+   [fuel_region]
+      type = SubdomainBoundingBoxGenerator
+      input = generator
+      bottom_left = '0 0 0' 
+      top_right = '0.7 1.0 0' #1D
+      block_id = 0
+   []
+   [gap_region]
+      type = SubdomainBoundingBoxGenerator
+      input = fuel_region
+      bottom_left = '0.5 0 0'
+      top_right = '0.7 1.0 0' #1D
+      block_id = 1
+   []
+   [clad_region]
+      type = SubdomainBoundingBoxGenerator
+      input = gap_region
+      bottom_left = '0.6 0 0'
+      top_right = '0.7 1.0 0' #1D
+      block_id = 2
+   []
+[]
+
+[Problem]
+   coord_type=RZ
+[]
+
+[Variables]
+   [temperature]
+      initial_condition = 500
+   []
+[]
+
+
+[Kernels]
+   [conduction_f]
+      type = ADHeatConduction
+      variable = temperature
+      thermal_conductivity = thermal_conductivity
+      block = 0
+   []
+   [conduction_g]
+      type = ADHeatConduction
+      variable = temperature
+      thermal_conductivity = thermal_conductivity
+      block = 1
+   []
+   [conduction_c]
+      type = ADHeatConduction
+      variable = temperature
+      thermal_conductivity = thermal_conductivity
+      block = 2
+   []
+   [heatsource]
+      type = ADMatHeatSource
+      material_property = volumetric_heat
+      variable = temperature
+      scalar = 1
+      block = 0
+   []
+[]
+
+[BCs]
+   [right_boundary] #1D
+      type = DirichletBC #1D
+      variable = temperature #1D
+      boundary = 1 #1D
+      value = 500 #1D
+   [] #1D
+   [left_boundary]
+      type = NeumannBC 
+      variable = temperature
+      boundary = 3
+      value = 0
+   []
+[]
+
+[Materials]
+   [fuel_material]
+      type = ADGenericConstantMaterial
+      prop_names = 'thermal_conductivity volumetric_heat' #SS
+      prop_values = '0.38 250' #SS
+      block = 0
+   []
+   [gap_material]
+      type = ADGenericConstantMaterial
+      prop_names = 'thermal_conductivity'
+      prop_values = '0.667'
+      block = 1
+   []
+   [clad_material]
+      type = ADGenericConstantMaterial
+      prop_names = 'thermal_conductivity'
+      prop_values = '0.2035'
+      block = 2
+   []
+[]
+
+
+
+[Executioner]
+   type = Steady #SS
+[]
+
+[Postprocessors]
+   [max_centerline]
+      type = NodalMaxValue
+      variable = temperature
+      boundary = 3
+   []
+[]
+
+[VectorPostprocessors]
+   [z000] #1D
+      type = LineValueSampler
+      start_point = '0 0.5 0'
+      end_point = '0.7 0.5 0'
+      num_points = 100
+      sort_by = x
+      variable = 'temperature'
+   []
+[]
+
+[Outputs]
+#   execute_on = 'timestep_end' #TR
+   execute_on = FINAL #SS
+   exodus = true
+#   csv = true
+[]
