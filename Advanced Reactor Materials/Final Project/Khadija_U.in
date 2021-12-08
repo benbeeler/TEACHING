@@ -1,0 +1,40 @@
+&CONTROL
+  calculation = "scf",
+  pseudo_dir  = "/home/kmahbub/QE/potential",
+  prefix      = "U"
+  outdir      = "/home/kmahbub/QE/W_3/6789",
+/
+&SYSTEM
+  ibrav       = 0,
+  nat         = 4,
+  ntyp        = 1,
+  ecutwfc     = 217.8624,
+  ecutrho     = 1600,
+  nspin       = 2,
+  tot_magnetization= 0,
+  lda_plus_u  = .TRUE.,
+  Hubbard_U   = 3,
+  occupations = "smearing",
+  smearing    = "mp",
+  degauss     = 0.015D0
+/
+&ELECTRONS
+  conv_thr    = 4.D-6,
+  mixing_beta = 0.3D0,
+/
+&IONS
+  bfgs_ndim         = 3,
+/
+ATOMIC_SPECIES
+U 238.029 U.pbe-spfn-kjpaw_psl.1.0.0.UPF
+CELL_PARAMETERS angstrom
+4.5 0.000 0.000
+0.000 4.5 0.000
+0.000 0.000 4.5
+ATOMIC_POSITIONS crystal
+U 0.000 0.000 0.000
+U 0.000 0.500 0.500
+U 0.500 0.500 0.000
+U 0.500 0.000 0.500
+K_POINTS automatic
+8 8 8 0 0 0
