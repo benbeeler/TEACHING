@@ -1,0 +1,106 @@
+&CONTROL
+
+   calculation =   'vc-relax'   ,
+
+   verbosity = 'high' ,
+
+   restart_mode = 'from_scratch' ,
+
+   prefix='Uranium' ,
+
+   outdir='.' ,
+
+   pseudo_dir = '/home/myhawary/QE/runs/pseudo' ,
+
+   tstress = .true.  ,
+
+   tprnfor= .true.  ,
+
+   nstep = 2000 ,
+
+   etot_conv_thr = 7.7D-6  ,
+
+   forc_conv_thr = 4.0D-5 ,
+
+/
+
+ &SYSTEM
+
+   ibrav = 0 ,
+
+    nat  =  4 ,
+
+   ntyp  = 1 ,
+
+   nbnd  = 32 ,
+
+  ecutwfc  =  93 ,
+
+  ecutrho  =  744 ,
+
+  occupations = 'smearing',
+
+  smearing = 'mv' ,
+
+  degauss = 0.05,
+
+  nspin = 2 ,
+
+  starting_magnetization(1)=0.1,
+
+!  lda_plus_u = .TRUE. ,
+
+! Hubbard_U(1) = 3.0 ,
+
+ /
+
+ &ELECTRONS
+
+                    diagonalization='david',
+
+                    mixing_mode = 'plain' ,
+
+                    mixing_beta = 0.5,
+
+                    startingwfc = 'random',
+
+                    conv_thr  =  1.0d-8  ,
+
+  /
+
+&ions
+
+    ion_dynamics='bfgs'
+
+/
+
+&CELL
+
+   cell_dynamics = 'bfgs' ,
+
+   cell_dofree = 'all',
+
+   press_conv_thr = 0.5 , ! This is the default
+
+ /
+
+CELL_PARAMETERS  angstrom
+4.433333     0.0000000      0.0000000
+0.000000     4.4333333      0.0000000
+0.000000      0.0000000     4.4333333
+
+ATOMIC_SPECIES
+
+U  238 U.pbe-spfn-rrkjus_psl.1.0.0.UPF
+
+
+ATOMIC_POSITIONS crystal
+U     0.000000    0.00000      0.000000
+U     0.500000    0.50000      0.0000000
+U     0.500000    0.00000      0.5000000
+U     0.000000    0.50000      0.5000000
+
+
+K_POINTS automatic
+
+  2 2 2  0 0 0
