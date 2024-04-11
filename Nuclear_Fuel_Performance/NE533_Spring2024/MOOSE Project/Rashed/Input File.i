@@ -1,107 +1,181 @@
 [Mesh]
-    #This is to generate the geometry stated in the problem. 
-  [total]
-    type = GeneratedMeshGenerator
-    dim = 2
-    nx = 250
-    ny = 250
-    xmax = 0.605 
-    ymax = 1
-  []
-  [subdomain1] 
-    #The gap dimensions
-    type = SubdomainBoundingBoxGenerator
-    input = total
-    bottom_left = '0.5 0 0'
-    top_right = '0.505 1 0'
-    block_id = '1'
-  []
-  [subdomain2]
-    #The fuel dimensions
-    type = SubdomainBoundingBoxGenerator
-    input = subdomain1
-    bottom_left = '0 0 0'
-    top_right = '0.5 1 0'
-    block_id = '2'
-  []
+    [total]
+        type = GeneratedMeshGenerator
+        dim = 2
+        xmin = 0 
+        xmax = .605
+        ymin = 0 
+        ymax = 100.
+        nx = 500
+        ny = 10
+    []
+    [clad]
+        type = SubdomainBoundingBoxGenerator
+        input = gap
+        bottom_left = '0.505 0 0'
+        top_right = '0.605 100. 0'
+        block_id = '0'
+    []
+    [gap]
+        type = SubdomainBoundingBoxGenerator
+        input = fuel
+        bottom_left = '0.5 0 0'
+        top_right = '0.505 100. 0'
+        block_id = '1' 
+    []
+    [fuel]
+        type = SubdomainBoundingBoxGenerator
+        input = total
+        bottom_left = '0 0 0'
+        top_right = '0.5 100. 0'
+        block_id = '2'
+    []
+    coord_type = RZ
+    rz_coord_axis = Y
 []
+
 [Functions]
-  [volumetric_heat]
-    #This is Q value as calculated from LHR  
-    type = ConstantFunction
-    value = 445.6338 
-  []
+    [q]
+        type = ParsedFunction
+        expression = 'LHR0*cos(A*(y/Z0-1))/(pi/(2^2))'
+        symbol_names = 'LHR0 Z0 A'
+        symbol_values = '350 50 1.208305'
+    []
+#    [temp_profile]
+#        type = ParsedFunction
+#        expression = 'Tin+((1/1.2)*(Z0*LHR0/mdot*cpw)*(sin(1.2)+sin(1.2*((y/Z0)-1))))'
+#        symbol_names = 'Tin Z0 LHR0 mdot cpw'
+#        symbol_values = '500 50 350 0.25 4200'
+#    []
 []
+
 [Variables]
-  [./T]
-   order = FIRST
-  [../]
+    [T]
+    []
 []
+
 [Kernels]
-  [./generated_heat]
-    type = HeatSource
-    variable = T
-    function = volumetric_heat
-    block = 2
-  [../]
-  [./temperature_conduction2]
-    type = ADHeatConduction
-    variable = T
-    thermal_conductivity = 0.03
-    block = 2
-  [../]
-  [./temperature_conduction1]
-    type = ADHeatConduction
-    variable = T
-    thermal_conductivity = 0.0026
-    block = 1
-  [../]  
-  [./temperature_conduction0]
-    type = ADHeatConduction
-    variable = T
-    thermal_conductivity = 0.17
-    block = 0
-  [../]  
+    [heat]
+        type = HeatSource
+        block = 2
+        variable = T 
+        function = q 
+    []
+    [conduction]
+        type = HeatConduction
+        variable = T 
+    []
 []
+
 [BCs]
-  [./left]
-    type = ADNeumannBC
-    variable = T
-    boundary = left
-    value = 0 
-  [../]
-  [./right]
-    type = ADDirichletBC
-    variable = T
-    boundary = right
-    value = 550 
-  [../]
+    [left]
+        type = NeumannBC
+        variable = T 
+        boundary = left
+        value = 0 
+    []
+ #   [right]
+ #       type = DirichletBC
+ #       variable = T 
+ #       boundary = right
+ #       value = 500
+ #   []
+    [right]
+        type = FunctionDirichletBC
+        variable = T
+        function = ((1/1.2083)*((50*350)/(.3*4200))*(sin(1.2083)+sin(1.2083*((y/50)-1))))+500
+        boundary = right
+    []
 []
+
 [Materials]
-  [./fuel]
-    type = HeatConductionMaterial
-    thermal_conductivity = 0.03
-    block = 2
-  [../]
-  [./gap]
-    type = HeatConductionMaterial
-    thermal_conductivity = 0.0026
-    block = 1
-  [../]
-  [./cladding]
-    type = HeatConductionMaterial
-    thermal_conductivity = 0.17
-    block = 0
-  [../]
+    [fuel]
+        type = HeatConductionMaterial
+        thermal_conductivity = 0.33
+        block = 2
+    []
+    [gap]
+        type = HeatConductionMaterial
+        thermal_conductivity = 0.0026
+        block = 1
+    []
+    [clad]
+        type = HeatConductionMaterial
+        thermal_conductivity = 0.17
+        block = 0
+    []
 []
-[Problem]
-  type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = Y
+
+#[Problem]
+#    type = FEProblem
+#    coord_type = RZ
+#    rz_coord_axis = Y
+#[]
+
+[Preconditioning]
+    [smp]
+        type = SMP
+        full = true
+    []
 []
+
 [Executioner]
-  type = Steady
+    type = Steady   
 []
+
+
+[VectorPostprocessors]
+    [TLine0]
+        type = LineValueSampler
+        variable = T 
+        start_point = '0 25 0'
+        end_point = '0.605 25 0'
+        num_points = 100 
+        sort_by = x 
+    []
+
+    [TLine1]
+        type = LineValueSampler
+        variable = T 
+        start_point = '0 50 0'
+        end_point = '0.605 50 0'
+        num_points = 100
+        sort_by = x
+    []
+
+    [TLine2]
+        type = LineValueSampler
+        variable = T 
+        start_point = '0 100 0'
+        end_point = '0.605 100 0'
+        num_points = 100 
+        sort_by = x 
+    [] 
+
+    [TLine3]
+        type = LineValueSampler
+        variable = T 
+        start_point = '0 0 0'
+        end_point = '0 100 0'
+        num_points = 100 
+        sort_by = y
+    [] 
+
+    [TLine4]
+        type = LineValueSampler
+        variable = T 
+        start_point = '0.605 0 0'
+        end_point = '0.605 100 0'
+        num_points = 100 
+        sort_by = y
+    [] 
+[]
+
 [Outputs]
-  exodus = true
+   exodus = true
+   [csv]
+    type = CSV
+    execute_on = 'final'
+   []
 []
+
